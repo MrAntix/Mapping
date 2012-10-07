@@ -7,7 +7,7 @@
     <authors>Anthony Johnston</authors>
     <owners>Antix Software Limited</owners>
     <projectUrl>http://mrantix.github.com/Mapping</projectUrl>
-    <iconUrl>https://github.com/MrAntix/Mapping/raw/master/Graphics/antix-mapper128x128.png</iconUrl>
+    <iconUrl>https://github.com/MrAntix/Mapping/raw/master/Graphics/antix-mapping128x128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A container for DRY object mapping</description>
     <copyright>Copyright Antix Software Limited 2012</copyright>
