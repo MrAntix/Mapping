@@ -13,25 +13,25 @@ namespace Antix.Mapping.Tests
 
         public a_multi_depth_supplied_mapping_no_matcher()
         {
-    _mapperContainer = new MapperContainer();
+            _mapperContainer = new MapperContainer();
 
-    _mapperContainer
-        .Register<Person, PersonEntity>(
-            (f, t, c) =>
-                {
-                    c.Map(f.Name, () => t.Name);
-                    c.MapAll(f.Addresses, () => t.Addresses);
-                })
-        .Register<Name, NameEntity>(
-            (f, t, c) =>
-                {
-                    t.First = f.First;
-                    t.Last = f.Last;
-                }
-        )
-        .Register<Address, AddressEntity>(
-            (f, t, c) => { t.Name = f.Name; }
-        );
+            _mapperContainer
+                .Register<Person, PersonEntity>(
+                    (f, t, c) =>
+                        {
+                            c.Map(f.Name, () => t.Name);
+                            c.MapAll(f.Addresses, () => t.Addresses);
+                        })
+                .Register<Name, NameEntity>(
+                    (f, t, c) =>
+                        {
+                            t.First = f.First;
+                            t.Last = f.Last;
+                        }
+                )
+                .Register<Address, AddressEntity>(
+                    (f, t, c) => { t.Name = f.Name; }
+                );
 
             _from = new Person
                         {
@@ -41,6 +41,16 @@ namespace Antix.Mapping.Tests
                                                 new Address {Name = "Address"}
                                             }
                         };
+
+            _to = new PersonEntity
+                      {
+                          Name = new NameEntity {First = "Overwite"},
+                          Addresses = new[]
+                                          {
+                                              new AddressEntity {Name = "Overwite"},
+                                              new AddressEntity {Name = "Overwite"}
+                                          }
+                      };
 
             _mapperContainer.Map(_from, () => _to);
         }

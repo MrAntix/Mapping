@@ -141,11 +141,18 @@ namespace Antix.Mapping
             foreach (var fromItem in from)
             {
                 // find the 'to' item or create one
-                var toItem = toOriginalArray
-                                 .SingleOrDefault(t => match(fromItem, t))
-                             ?? (createToItem == null
-                                     ? (TTo) Activator.CreateInstance(toItemType)
-                                     : createToItem());
+                var toItem = default(TTo);
+                if (match != null)
+                {
+                    toItem = toOriginalArray
+                        .SingleOrDefault(t => match(fromItem, t));
+                }
+                if (toItem == null)
+                {
+                    toItem = createToItem == null
+                                 ? (TTo) Activator.CreateInstance(toItemType)
+                                 : createToItem();
+                }
 
                 // map
                 mapperMethod.Invoke(mapper,
