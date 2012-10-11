@@ -13,7 +13,7 @@ namespace Antix.Mapping.Tests
             _mapperContainer = new MapperContainer();
 
             _mapperContainer
-                .Register<Person, PersonEntity>(
+                .RegisterMapper<Person, PersonEntity>(
                     (f, t, c) => { t.Email = f.Email; }
                 );
         }

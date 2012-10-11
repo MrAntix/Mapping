@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Antix.Mapping.Tests.Entities;
 using Antix.Mapping.Tests.Models;
@@ -7,43 +9,58 @@ namespace Antix.Mapping.Tests
 {
     public class a_multi_depth_supplied_mapping_matcher
     {
-        readonly MapperContainer _mapperContainer;
+        readonly IMapperContainer _mapperContainer;
         readonly PersonEntity _to;
         readonly Person _from;
+        readonly List<IEntity> _updatedEntities;
+        readonly List<IEntity> _deletedEntities;
 
         public a_multi_depth_supplied_mapping_matcher()
         {
-            _mapperContainer = new MapperContainer();
+            _updatedEntities = new List<IEntity>();
+            _deletedEntities = new List<IEntity>();
 
-            _mapperContainer
-                .Register<Person, PersonEntity>(
+            _mapperContainer = new MapperContainer()
+                .RegisterMapper<Person, PersonEntity>(
                     (f, t, c) =>
                         {
                             c.Map(f.Name, () => t.Name);
                             c.MapAll(f.Addresses, () => t.Addresses, (fa, ta) => fa.Name == ta.Name);
                         }
                 )
-                .Register<Name, NameEntity>(
+                .RegisterMapper<Name, NameEntity>(
                     (f, t, c) =>
                         {
                             t.First = f.First;
                             t.Last = f.Last;
                         }
                 )
-                .Register<Address, AddressEntity>(
+                .RegisterMapper<Address, AddressEntity>(
                     (f, t, c) => { t.Name = f.Name; }
-                );
+                )
+                .RegisterCreator(t => (IEntity) Activator.CreateInstance(t))
+                .RegisterUpdater<IEntity>(e => _updatedEntities.Add(e))
+                .RegisterDeleter<IEntity>(e => _deletedEntities.Add(e));
 
             _from = new Person
                         {
                             Name = new Name {First = "Person"},
                             Addresses = new[]
                                             {
-                                                new Address {Name = "Address"}
+                                                new Address {Name = "Keep"},
+                                                new Address {Name = "New"}
                                             }
                         };
 
-            _to = new PersonEntity();
+            _to = new PersonEntity
+                      {
+                          Name = new NameEntity {First = "Overwite"},
+                          Addresses = new[]
+                                          {
+                                              new AddressEntity {Name = "Keep"},
+                                              new AddressEntity {Name = "Delete"}
+                                          }
+                      };
 
             _mapperContainer.Map(_from, () => _to);
         }
@@ -70,6 +87,16 @@ namespace Antix.Mapping.Tests
                     _from.Addresses.ElementAt(index).Name,
                     _to.Addresses.ElementAt(index).Name);
             }
+        }
+
+        [Fact]
+        void deletes_sub_objects()
+        {
+            Assert.Equal(1, _deletedEntities.Count());
+            Assert.IsType<AddressEntity>(_deletedEntities.ElementAt(0));
+
+            var address = (AddressEntity) _deletedEntities.ElementAt(0);
+            Assert.Equal("Delete", address.Name);
         }
     }
 }

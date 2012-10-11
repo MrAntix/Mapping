@@ -7,7 +7,7 @@ namespace Antix.Mapping
     public static class Extensions
     {
         public static void Map<TFrom, TTo>(
-            this MapperContainer container,
+            this IMapperContainer container,
             TFrom from,
             Expression<Func<TTo>> toExpression)
             where TTo : class
@@ -18,7 +18,7 @@ namespace Antix.Mapping
         }
 
         public static void MapAll<TFrom, TTo>(
-            this MapperContainer container,
+            this IMapperContainer container,
             IEnumerable<TFrom> from,
             Expression<Func<IEnumerable<TTo>>> toExpression,
             Func<TFrom, TTo, bool> match)
@@ -26,33 +26,18 @@ namespace Antix.Mapping
         {
             container.MapAll(
                 from, toExpression,
-                match,
-                null);
+                match);
         }
 
         public static void MapAll<TFrom, TTo>(
-            this MapperContainer container,
+            this IMapperContainer container,
             IEnumerable<TFrom> from,
             Expression<Func<IEnumerable<TTo>>> toExpression)
             where TTo : class
         {
             container.MapAll(
                 from, toExpression,
-                null,
                 null);
-        }
-
-        public static void MapAll<TFrom, TTo>(
-            this MapperContainer container,
-            IEnumerable<TFrom> from,
-            Expression<Func<IEnumerable<TTo>>> toExpression,
-            Func<TTo> createToItem)
-            where TTo : class
-        {
-            container.MapAll(
-                from, toExpression,
-                null,
-                createToItem);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Antix.Mapping.Tests
             _mapperContainer = new MapperContainer();
 
             _mapperContainer
-                .Register<Person, PersonEntity>(
+                .RegisterMapper<Person, PersonEntity>(
                     (f, t, c) => { }
                 );
         }
@@ -24,7 +24,7 @@ namespace Antix.Mapping.Tests
         {
             Assert.True(
                 _mapperContainer
-                    .Contains<Person, PersonEntity>()
+                    .ContainsMapper<Person, PersonEntity>()
                 );
         }
 

@@ -1,3 +1,4 @@
 ##1.0.0-b01 Initial Commit, setting up release framework and versioning
 ##1.0.0-b02 Added icon
 ##1.0.0-b03 Null check added for match
+##1.0.0-b04 Added creator and deleter registry, this will allow it to work with EF, updater is to do

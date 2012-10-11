@@ -48,6 +48,7 @@
     <Compile Include="a_multi_depth_supplied_mapping_no_matcher.cs" />
     <Compile Include="a_multi_depth_supplied_mapping_with_sub_object_match.cs" />
     <Compile Include="a_single_depth_supplied_mapping.cs" />
+    <Compile Include="Entities\IEntity.cs" />
     <Compile Include="expressions\get_declaring_parent.cs" />
     <Compile Include="Models\IAddress.cs" />
     <Compile Include="Models\IPerson.cs" />

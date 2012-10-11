@@ -8,7 +8,7 @@ namespace Antix.Mapping.Tests.Entities
         public string Last { get; set; }
     }
 
-    public class PersonEntity
+    public class PersonEntity : IEntity
     {
         public int Id { get; set; }
 
