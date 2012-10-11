@@ -268,7 +268,10 @@ namespace Antix.Mapping
 
         void RegisterCreator(Type type, object func)
         {
-            _creators.Add(type, func);
+            lock (LockObject)
+            {
+                _creators.Add(type, func);
+            }
         }
 
         Func<Type, object> GetCreator<T>()
@@ -291,12 +294,18 @@ namespace Antix.Mapping
 
         void RegisterUpdater(Type type, object func)
         {
-            _updaters.Add(type, func);
+            lock (LockObject)
+            {
+                _updaters.Add(type, func);
+            }
         }
 
         void RegisterDeleter(Type type, Action<object> func)
         {
-            _deleters.Add(type, func);
+            lock (LockObject)
+            {
+                _deleters.Add(type, func);
+            }
         }
 
         Action<object> GetDeleter<T>()
