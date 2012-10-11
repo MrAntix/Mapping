@@ -63,11 +63,9 @@ namespace Antix.Mapping
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <param name="from"> Object to map from </param>
         /// <param name="toExpression"> Expression for the target </param>
-        /// <param name="createToItem"> Create a new to item </param>
         void Map<TFrom, TTo>(
             TFrom from,
-            Expression<Func<TTo>> toExpression,
-            Func<TTo> createToItem)
+            Expression<Func<TTo>> toExpression)
             where TTo : class;
 
         /// <summary>

@@ -6,17 +6,6 @@ namespace Antix.Mapping
 {
     public static class Extensions
     {
-        public static void Map<TFrom, TTo>(
-            this IMapperContainer container,
-            TFrom from,
-            Expression<Func<TTo>> toExpression)
-            where TTo : class
-        {
-            container.Map(
-                from, toExpression,
-                null);
-        }
-
         public static void MapAll<TFrom, TTo>(
             this IMapperContainer container,
             IEnumerable<TFrom> from,

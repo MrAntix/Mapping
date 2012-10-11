@@ -109,22 +109,24 @@ namespace Antix.Mapping
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <param name="from"> Object to map from </param>
         /// <param name="toExpression"> Expression for the target </param>
-        /// <param name="createToItem"> Create a new to item </param>
         public void Map<TFrom, TTo>(
             TFrom from,
-            Expression<Func<TTo>> toExpression,
-            Func<TTo> createToItem)
+            Expression<Func<TTo>> toExpression)
             where TTo : class
         {
+            if (toExpression == null) throw new ArgumentNullException("toExpression");
+            if (Equals(from, default(TFrom))) return;
+
             var toMember
                 = new CollapseMembersExpressionVisitor()
                     .Modify(toExpression);
             var to = toMember.GetValue();
             if (to == null)
             {
-                to = createToItem == null
-                         ? (TTo) Activator.CreateInstance(toMember.Type)
-                         : createToItem();
+                var creator = GetCreator<TTo>()
+                    ?? Activator.CreateInstance;
+
+                to = (TTo) creator(toMember.Type);
                 toMember.SetValue(to);
             }
 
@@ -147,6 +149,9 @@ namespace Antix.Mapping
             Func<TFrom, TTo, bool> match)
             where TTo : class
         {
+            if (toExpression == null) throw new ArgumentNullException("toExpression");
+            if (from == null) return;
+
             var toMember
                 = new CollapseMembersExpressionVisitor()
                     .Modify(toExpression);
@@ -184,7 +189,8 @@ namespace Antix.Mapping
             var mapper = GetMapper(fromItemType, toItemType);
             var mapperMethod = mapper.GetType().GetMethod("Invoke");
 
-            var creator = GetCreator<TTo>();
+            var creator = GetCreator<TTo>()
+                ?? Activator.CreateInstance;
 
             foreach (var fromItem in from)
             {
@@ -200,10 +206,7 @@ namespace Antix.Mapping
 
                 if (toItem == null)
                 {
-                    toItem = (TTo)
-                             (creator == null
-                                  ? Activator.CreateInstance(toItemType)
-                                  : creator(toItemType));
+                    toItem = (TTo) creator(toItemType);
                 }
 
                 // map
