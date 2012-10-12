@@ -7,15 +7,15 @@ namespace Antix.Mapping.Tests
 {
     public class calling_map
     {
-        readonly MapperContainer _mapperContainer;
+        readonly IMapperContext _mapperContext;
 
         public calling_map()
         {
-            _mapperContainer = new MapperContainer();
-
-            _mapperContainer
-                .RegisterMapper<Person, PersonEntity>(
-                    (f, t, c) => { t.Name = new NameEntity(); }
+            _mapperContext = new MapperContext(
+                new MapperContainer()
+                    .Register<Person, PersonEntity>(
+                        (f, t, c) => { t.Name = new NameEntity(); }
+                    )
                 );
         }
 
@@ -24,7 +24,7 @@ namespace Antix.Mapping.Tests
         {
             var entity = default(PersonEntity);
 
-            _mapperContainer.Map(default(Person), () => entity);
+            _mapperContext.Map(default(Person), () => entity);
 
             Assert.Null(entity);
         }
@@ -34,7 +34,7 @@ namespace Antix.Mapping.Tests
         {
             var entity = default(PersonEntity);
 
-            _mapperContainer.Map(new Person(), () => entity);
+            _mapperContext.Map(new Person(), () => entity);
 
             Assert.NotNull(entity);
         }
@@ -43,7 +43,7 @@ namespace Antix.Mapping.Tests
         void to_expression_must_be_supplied()
         {
             Assert.Throws<ArgumentNullException>(
-                () => _mapperContainer.Map<Person, PersonEntity>(null, null));
+                () => _mapperContext.Map<Person, PersonEntity>(null, null));
         }
     }
 }

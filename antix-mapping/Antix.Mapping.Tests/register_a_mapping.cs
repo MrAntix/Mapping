@@ -7,15 +7,15 @@ namespace Antix.Mapping.Tests
 {
     public class register_a_mapping
     {
-        readonly MapperContainer _mapperContainer;
+        readonly IMapperContext _mapperContext;
 
         public register_a_mapping()
         {
-            _mapperContainer = new MapperContainer();
-
-            _mapperContainer
-                .RegisterMapper<Person, PersonEntity>(
-                    (f, t, c) => { }
+            _mapperContext = new MapperContext(
+                new MapperContainer()
+                    .Register<Person, PersonEntity>(
+                        (f, t, c) => { }
+                    )
                 );
         }
 
@@ -23,8 +23,8 @@ namespace Antix.Mapping.Tests
         void map_exists()
         {
             Assert.True(
-                _mapperContainer
-                    .ContainsMapper<Person, PersonEntity>()
+                _mapperContext.Container
+                    .Contains<Person, PersonEntity>()
                 );
         }
 
@@ -40,7 +40,7 @@ namespace Antix.Mapping.Tests
             object result = null;
 
             var ex = Assert.Throws<MapperNotRegisteredException>(
-                () => _mapperContainer.Map(new object(), () => result)
+                () => _mapperContext.Map(new object(), () => result)
                 );
 
             Assert.Equal(

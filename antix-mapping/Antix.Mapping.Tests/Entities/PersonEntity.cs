@@ -2,12 +2,6 @@ using System.Collections.Generic;
 
 namespace Antix.Mapping.Tests.Entities
 {
-    public class NameEntity
-    {
-        public string First { get; set; }
-        public string Last { get; set; }
-    }
-
     public class PersonEntity : IEntity
     {
         public int Id { get; set; }

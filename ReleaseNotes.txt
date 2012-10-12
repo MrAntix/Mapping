@@ -3,3 +3,4 @@
 ##1.0.0-b03 Null check added for match
 ##1.0.0-b04 Added creator and deleter registry, this will allow it to work with EF, updater is to do
 ##1.0.0-b05 No work is done on null from in Map functions, this is to allow partial graphs to be mapped
+##1.0.0-b06 Refactored to use a context object for create, delete and update delegates

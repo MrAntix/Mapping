@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Antix.Mapping.Tests.Entities;
@@ -9,7 +8,7 @@ namespace Antix.Mapping.Tests
 {
     public class a_multi_depth_supplied_mapping_matcher
     {
-        readonly IMapperContainer _mapperContainer;
+        readonly IMapperContext _mapperContext;
         readonly PersonEntity _to;
         readonly Person _from;
         readonly List<IEntity> _updatedEntities;
@@ -20,27 +19,31 @@ namespace Antix.Mapping.Tests
             _updatedEntities = new List<IEntity>();
             _deletedEntities = new List<IEntity>();
 
-            _mapperContainer = new MapperContainer()
-                .RegisterMapper<Person, PersonEntity>(
-                    (f, t, c) =>
-                        {
-                            c.Map(f.Name, () => t.Name);
-                            c.MapAll(f.Addresses, () => t.Addresses, (fa, ta) => fa.Name == ta.Name);
-                        }
-                )
-                .RegisterMapper<Name, NameEntity>(
-                    (f, t, c) =>
-                        {
-                            t.First = f.First;
-                            t.Last = f.Last;
-                        }
-                )
-                .RegisterMapper<Address, AddressEntity>(
-                    (f, t, c) => { t.Name = f.Name; }
-                )
-                .RegisterCreator(t => (IEntity) Activator.CreateInstance(t))
-                .RegisterUpdater<IEntity>(e => _updatedEntities.Add(e))
-                .RegisterDeleter<IEntity>(e => _deletedEntities.Add(e));
+            _mapperContext = new MapperContext(
+                new MapperContainer()
+                    .Register<Person, PersonEntity>(
+                        (f, t, c) =>
+                            {
+                                c.Map(f.Name, () => t.Name);
+                                c.MapAll(f.Addresses, () => t.Addresses, (fa, ta) => fa.Name == ta.Name);
+                            }
+                    )
+                    .Register<Name, NameEntity>(
+                        (f, t, c) =>
+                            {
+                                t.First = f.First;
+                                t.Last = f.Last;
+                            }
+                    )
+                    .Register<Address, AddressEntity>(
+                        (f, t, c) => { t.Name = f.Name; }
+                    ),
+                new MapperContext.Parameters
+                    {
+                        Deleter = e => _deletedEntities.Add((IEntity)e),
+                        Updater = e => _updatedEntities.Add((IEntity)e)
+                    }
+                );
 
             _from = new Person
                         {
@@ -62,7 +65,7 @@ namespace Antix.Mapping.Tests
                                           }
                       };
 
-            _mapperContainer.Map(_from, () => _to);
+            _mapperContext.Map(_from, () => _to);
         }
 
         [Fact]

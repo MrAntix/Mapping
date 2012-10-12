@@ -8,15 +8,15 @@ namespace Antix.Mapping.Tests
 {
     public class calling_map_all
     {
-        readonly MapperContainer _mapperContainer;
+        readonly IMapperContext _mapperContext;
 
         public calling_map_all()
         {
-            _mapperContainer = new MapperContainer();
-
-            _mapperContainer
-                .RegisterMapper<Person, PersonEntity>(
-                    (f, t, c) => { }
+            _mapperContext = new MapperContext(
+                new MapperContainer()
+                    .Register<Person, PersonEntity>(
+                        (f, t, c) => { }
+                    )
                 );
         }
 
@@ -25,7 +25,7 @@ namespace Antix.Mapping.Tests
         {
             var entities = default(List<PersonEntity>);
 
-            _mapperContainer.MapAll(default(IEnumerable<Person>), () => entities);
+            _mapperContext.MapAll(default(IEnumerable<Person>), () => entities);
 
             Assert.Null(entities);
         }
@@ -35,7 +35,7 @@ namespace Antix.Mapping.Tests
         {
             var entities = default(List<PersonEntity>);
 
-            _mapperContainer.MapAll(new[]
+            _mapperContext.MapAll(new[]
                                         {
                                             new Person()
                                         }, () => entities);
@@ -47,7 +47,7 @@ namespace Antix.Mapping.Tests
         void to_expression_must_be_supplied()
         {
             Assert.Throws<ArgumentNullException>(
-                () => _mapperContainer.MapAll<Person, PersonEntity>(null, null));
+                () => _mapperContext.MapAll<Person, PersonEntity>(null, null));
         }
     }
 }

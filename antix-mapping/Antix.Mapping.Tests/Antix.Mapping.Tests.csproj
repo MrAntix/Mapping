@@ -51,6 +51,7 @@
     <Compile Include="calling_Map.cs" />
     <Compile Include="calling_map_all.cs" />
     <Compile Include="Entities\IEntity.cs" />
+    <Compile Include="Entities\NameEntity.cs" />
     <Compile Include="expressions\get_declaring_parent.cs" />
     <Compile Include="Models\IAddress.cs" />
     <Compile Include="Models\IPerson.cs" />

@@ -15,15 +15,6 @@ namespace Antix.Mapping
         readonly IDictionary<Tuple<Type, Type>, object>
             _mappers = new Dictionary<Tuple<Type, Type>, object>();
 
-        readonly IDictionary<Type, object>
-            _creators = new Dictionary<Type, object>();
-
-        readonly IDictionary<Type, object>
-            _updaters = new Dictionary<Type, object>();
-
-        readonly IDictionary<Type, Action<object>>
-            _deleters = new Dictionary<Type, Action<object>>();
-
         /// <summary>
         ///   <para> Register a mapping </para>
         /// </summary>
@@ -31,10 +22,10 @@ namespace Antix.Mapping
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <param name="action"> Mapping </param>
         /// <returns> This container </returns>
-        public IMapperContainer RegisterMapper<TFrom, TTo>(
-            Action<TFrom, TTo, IMapperContainer> action)
+        public IMapperContainer Register<TFrom, TTo>(
+            Action<TFrom, TTo, IMapperContext> action)
         {
-            RegisterMapper(GetMapperKey<TFrom, TTo>(), action);
+            Register(GetMapperKey<TFrom, TTo>(), action);
 
             return this;
         }
@@ -45,49 +36,10 @@ namespace Antix.Mapping
         /// <typeparam name="TFrom"> Type to map from </typeparam>
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <returns> Mapper </returns>
-        public Action<TFrom, TTo, IMapperContainer> GetMapper<TFrom, TTo>()
+        public Action<TFrom, TTo, IMapperContext> Get<TFrom, TTo>()
         {
-            return (Action<TFrom, TTo, IMapperContainer>)
-                   GetMapper(typeof (TFrom), typeof (TTo));
-        }
-
-        /// <summary>
-        ///   <para> Register the creator </para>
-        /// </summary>
-        /// <typeparam name="T"> Type to create </typeparam>
-        /// <param name="func"> Creator function </param>
-        /// <returns> This Container </returns>
-        public IMapperContainer RegisterCreator<T>(Func<Type, T> func)
-        {
-            RegisterCreator(typeof (T), func);
-
-            return this;
-        }
-
-        /// <summary>
-        ///   <para> Register the updater </para>
-        /// </summary>
-        /// <typeparam name="T"> Type to update </typeparam>
-        /// <param name="action"> Updater function </param>
-        /// <returns> This Container </returns>
-        public IMapperContainer RegisterUpdater<T>(Action<T> action)
-        {
-            RegisterUpdater(typeof (T), action);
-
-            return this;
-        }
-
-        /// <summary>
-        ///   <para> Register the deteter </para>
-        /// </summary>
-        /// <typeparam name="T"> Type to detete </typeparam>
-        /// <param name="action"> Deleter function </param>
-        /// <returns> This Container </returns>
-        public IMapperContainer RegisterDeleter<T>(Action<T> action)
-        {
-            RegisterDeleter(typeof (T), o => action((T) o));
-
-            return this;
+            return (Action<TFrom, TTo, IMapperContext>)
+                   Get(typeof (TFrom), typeof (TTo));
         }
 
         /// <summary>
@@ -96,7 +48,7 @@ namespace Antix.Mapping
         /// <typeparam name="TFrom"> Type to map from </typeparam>
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <returns> True if found </returns>
-        public bool ContainsMapper<TFrom, TTo>()
+        public bool Contains<TFrom, TTo>()
         {
             return
                 _mappers.ContainsKey(GetMapperKey<TFrom, TTo>());
@@ -109,9 +61,11 @@ namespace Antix.Mapping
         /// <typeparam name="TTo"> Type to map to </typeparam>
         /// <param name="from"> Object to map from </param>
         /// <param name="toExpression"> Expression for the target </param>
+        /// <param name="context"> Context </param>
         public void Map<TFrom, TTo>(
             TFrom from,
-            Expression<Func<TTo>> toExpression)
+            Expression<Func<TTo>> toExpression,
+            IMapperContext context)
             where TTo : class
         {
             if (toExpression == null) throw new ArgumentNullException("toExpression");
@@ -123,16 +77,16 @@ namespace Antix.Mapping
             var to = toMember.GetValue();
             if (to == null)
             {
-                var creator = GetCreator<TTo>()
-                    ?? Activator.CreateInstance;
+                to = context.Create<TTo>();
 
-                to = (TTo) creator(toMember.Type);
                 toMember.SetValue(to);
             }
 
-            var mapper = GetMapper<TFrom, TTo>();
+            var mapper = Get<TFrom, TTo>();
 
-            mapper(from, to, this);
+            mapper(from, to, context);
+
+            context.Update(to);
         }
 
         /// <summary>
@@ -143,10 +97,12 @@ namespace Antix.Mapping
         /// <param name="from"> Object enumerable to map from </param>
         /// <param name="toExpression"> Object collection to map to </param>
         /// <param name="match"> Match function to find objects in the 'to' items given a 'from' item </param>
+        /// <param name="context"> Context </param>
         public void MapAll<TFrom, TTo>(
             IEnumerable<TFrom> from,
             Expression<Func<IEnumerable<TTo>>> toExpression,
-            Func<TFrom, TTo, bool> match)
+            Func<TFrom, TTo, bool> match,
+            IMapperContext context)
             where TTo : class
         {
             if (toExpression == null) throw new ArgumentNullException("toExpression");
@@ -186,11 +142,8 @@ namespace Antix.Mapping
 
             // prepare to map each 'from' item
             var fromItemType = typeof (TFrom);
-            var mapper = GetMapper(fromItemType, toItemType);
+            var mapper = Get(fromItemType, toItemType);
             var mapperMethod = mapper.GetType().GetMethod("Invoke");
-
-            var creator = GetCreator<TTo>()
-                ?? Activator.CreateInstance;
 
             foreach (var fromItem in from)
             {
@@ -206,25 +159,24 @@ namespace Antix.Mapping
 
                 if (toItem == null)
                 {
-                    toItem = (TTo) creator(toItemType);
+                    toItem = context.Create<TTo>();
                 }
 
                 // map
                 mapperMethod.Invoke(mapper,
-                                    new object[] {fromItem, toItem, this});
+                                    new object[] {fromItem, toItem, context});
 
                 toList.Add(toItem);
+
+                context.Update(toItem);
             }
 
             if (!toListOriginal.Any()) return;
 
-            var deleter = GetDeleter<TTo>();
-            if (deleter == null) return;
-
-            foreach (var toItem in toListOriginal) deleter(toItem);
+            foreach (var toItem in toListOriginal) context.Delete(toItem);
         }
 
-        internal void RegisterMapper(
+        internal void Register(
             Tuple<Type, Type> key, Object mapper)
         {
             lock (LockObject)
@@ -233,7 +185,7 @@ namespace Antix.Mapping
             }
         }
 
-        object GetMapper(Type fromType, Type toType)
+        object Get(Type fromType, Type toType)
         {
             var key = Tuple.Create(fromType, toType);
 
@@ -250,7 +202,7 @@ namespace Antix.Mapping
                 if (mapFound == null)
                     throw new MapperNotRegisteredException(key);
 
-                RegisterMapper(key, mapFound);
+                Register(key, mapFound);
             }
 
             return _mappers[key];
@@ -264,65 +216,6 @@ namespace Antix.Mapping
         static Tuple<Type, Type> GetMapperKey(Type fromType, Type toType)
         {
             return Tuple.Create(fromType, toType);
-        }
-
-        void RegisterCreator(Type type, object func)
-        {
-            lock (LockObject)
-            {
-                _creators.Add(type, func);
-            }
-        }
-
-        Func<Type, object> GetCreator<T>()
-        {
-            var type = typeof (T);
-            if (!_creators.ContainsKey(type))
-            {
-                // check other implementations, and cache if found
-                var found = (Func<Type, object>)
-                            (from k in _creators.Keys
-                             where Implements(type, k)
-                             select _creators[k])
-                                .FirstOrDefault();
-
-                RegisterCreator(type, found);
-            }
-
-            return (Func<Type, object>) _creators[type];
-        }
-
-        void RegisterUpdater(Type type, object func)
-        {
-            lock (LockObject)
-            {
-                _updaters.Add(type, func);
-            }
-        }
-
-        void RegisterDeleter(Type type, Action<object> func)
-        {
-            lock (LockObject)
-            {
-                _deleters.Add(type, func);
-            }
-        }
-
-        Action<object> GetDeleter<T>()
-        {
-            var type = typeof (T);
-            if (!_deleters.ContainsKey(type))
-            {
-                // check other implementations, and cache if found
-                var found = (from k in _deleters.Keys
-                             where Implements(type, k)
-                             select _deleters[k])
-                    .FirstOrDefault();
-
-                RegisterDeleter(type, found);
-            }
-
-            return _deleters[type];
         }
 
         #region type helpers

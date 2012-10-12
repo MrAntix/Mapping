@@ -43,8 +43,10 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Expressions\MemberExpressionWrapper.cs" />
     <Compile Include="IMapperContainer.cs" />
+    <Compile Include="IMapperContext.cs" />
     <Compile Include="MapperContainer.cs" />
     <Compile Include="Expressions\CollapseMembersExpressionVisitor.cs" />
+    <Compile Include="MapperContext.cs" />
     <Compile Include="MapperNotRegisteredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

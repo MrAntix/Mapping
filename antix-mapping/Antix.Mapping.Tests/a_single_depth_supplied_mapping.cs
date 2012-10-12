@@ -6,15 +6,15 @@ namespace Antix.Mapping.Tests
 {
     public class a_single_depth_supplied_mapping
     {
-        readonly MapperContainer _mapperContainer;
+        readonly IMapperContext _mapperContext;
 
         public a_single_depth_supplied_mapping()
         {
-            _mapperContainer = new MapperContainer();
-
-            _mapperContainer
-                .RegisterMapper<Person, PersonEntity>(
-                    (f, t, c) => { t.Email = f.Email; }
+            _mapperContext = new MapperContext(
+                new MapperContainer()
+                    .Register<Person, PersonEntity>(
+                        (f, t, c) => { t.Email = f.Email; }
+                    )
                 );
         }
 
@@ -28,7 +28,7 @@ namespace Antix.Mapping.Tests
 
             var to = new PersonEntity();
 
-            _mapperContainer.Map(from, () => to);
+            _mapperContext.Map(from, () => to);
 
             Assert.Equal(from.Email, to.Email);
         }
