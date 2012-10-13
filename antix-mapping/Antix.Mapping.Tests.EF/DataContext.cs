@@ -10,10 +10,15 @@ namespace Antix.Mapping.Tests.EF
             Container = container;
         }
 
+        public IDbSet<PersonEntity> People
+        {
+            get { return Set<PersonEntity>(); }
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PersonEntity>()
-                .HasKey(p=>p.Id)
+                .HasKey(p => p.Id)
                 .HasMany(p => p.Addresses)
                 .WithRequired(a => a.Person);
 

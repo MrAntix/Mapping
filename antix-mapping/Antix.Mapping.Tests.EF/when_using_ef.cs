@@ -36,7 +36,6 @@ namespace Antix.Mapping.Tests.EF
             Database.SetInitializer(new DropCreateDatabaseIfModelChanges<DataContext>());
             _dataContext = new DataContext(mapperContainer);
 
-
             _from = new Person
                         {
                             Name = new Name {First = "Person"},
@@ -47,15 +46,6 @@ namespace Antix.Mapping.Tests.EF
                                             }
                         };
 
-            _to = new PersonEntity
-                      {
-                          Name = new NameEntity {First = "Overwite"},
-                          Addresses = new[]
-                                          {
-                                              new AddressEntity {Name = "Keep"},
-                                              new AddressEntity {Name = "Delete"}
-                                          }
-                      };
             _to = _dataContext.Create<PersonEntity>();
             _to.Name = new NameEntity {First = "Overwite"};
             _to.Addresses = new[]
@@ -65,7 +55,15 @@ namespace Antix.Mapping.Tests.EF
                                 };
             _dataContext.SaveChanges();
 
+            var personId = _to.Id;
+
             _dataContext.Map(_from, () => _to);
+            _dataContext.SaveChanges();
+
+            _dataContext = new DataContext(mapperContainer);
+            _to = _dataContext
+                .People.Include(p => p.Addresses)
+                .Single(p => p.Id == personId);
         }
 
         [Fact]
