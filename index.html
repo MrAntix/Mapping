@@ -34,28 +34,63 @@
 
 <p>When you map your objects you get the container passed into the mapper too, this means you can call other mappings from inside your mapping and keep your code all nice and DRY</p>
 
+<p>Here are a couple of simple examples, <em>See the tests for more</em></p>
+
 <h3>Basic Example</h3>
 
-<pre><code>// set up the container in your composite root 
-// as a single instance
-var mapperContainer = new MapperContainer();
+<p>Given these simple classes which need mapping, model=&gt;entity</p>
+
+<pre><code>public class PersonModel
+{
+    public string Name { get; set; }
+    public ICollection&lt;AddressModel&gt; Addresses { get; set; }
+}
+
+public class AddressModel
+{
+    public string Name { get; set; }
+}
+
+public class PersonEntity
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public ICollection&lt;AddressEntity&gt; Addresses { get; set; }
+}
+
+public class AddressEntity : IEntity
+{
+    public string Name { get; set; }
+}
+</code></pre>
+
+<p>Set up the container in your composite root as a single instance</p>
+
+<pre><code>var mapperContainer = new MapperContainer();
 
 var mapperContainer
-    .Register&lt;Person, PersonEntity&gt;(
-        (f, t, c) =&gt;
+    .Register&lt;PersonModel, PersonEntity&gt;(
+        (model, entity, context) =&gt;
             {
-                f.Name = t.Name;
-                c.MapAll(f.Addresses, () =&gt; t.Addresses);
+                entity.Name = model.Name;
+                c.MapAll(model.Addresses, () =&gt; entity.Addresses);
             })
-    .Register&lt;Address, AddressEntity&gt;(
-        (f, t, c) =&gt; { t.Name = f.Name; }
+    .Register&lt;AddressModel, AddressEntity&gt;(
+        (model, entity, context) =&gt; 
+            {
+                entity.Name = model.Name; 
+            }
     );
+</code></pre>
 
-// create a new context as required like so
-var mapperContext = new MapperContext(mapperContainer);
+<p>Create a new context as required like so, this can all be hooked by your IoC container</p>
 
-// inject the mapping context where you need it
-public class PersonController : Controller 
+<pre><code>var mapperContext = new MapperContext(mapperContainer);
+</code></pre>
+
+<p>Inject the mapping context where you need it</p>
+
+<pre><code>public class PersonController : Controller 
 {
     IMapperContext _mapperContext;
 
@@ -64,7 +99,7 @@ public class PersonController : Controller
         _mapperContext = mapperContext;
     }
 
-    ActionResult Update(Person model) {
+    ActionResult Update(PersonModel model) {
 
         var entity = entityService.Load([SomeCriteria]);
 
@@ -75,7 +110,7 @@ public class PersonController : Controller
 }
 </code></pre>
 
-<p>In this example the registered Address =&gt; AddressEnity mapper is called for the collection of Addresses on the person
+<p>In this example the registered AddressModel =&gt; AddressEnity mapper is called for the collection of Addresses on the person
 Both Person and Address sub-collection objects are mapped</p>
 
 <h3>EntityFramework Example</h3>
@@ -113,8 +148,8 @@ In this example the IMapperContainer is injected in to the DataContext object</p
         set.Remove(entity);
     }
 
-    ... and other DbContext type stuff 
-            IDbSet&lt;PersonEntity&gt; People etc
+        ... and other DbContext type stuff 
+              IDbSet&lt;PersonEntity&gt; People etc
 }
 </code></pre>
 
@@ -124,8 +159,6 @@ In this example the IMapperContainer is injected in to the DataContext object</p
 
 dataContext.Map(model, () =&gt; entity);
 </code></pre>
-
-<hr><p><em>See the tests for more examples</em></p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/MrAntix">MrAntix</a></p>
