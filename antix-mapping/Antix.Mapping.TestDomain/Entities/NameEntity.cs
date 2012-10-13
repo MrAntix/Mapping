@@ -1,6 +1,6 @@
-namespace Antix.Mapping.Tests.Entities
+namespace Antix.Mapping.TestDomain.Entities
 {
-    public class NameEntity : IEntity
+    public class NameEntity
     {
         public string First { get; set; }
         public string Last { get; set; }

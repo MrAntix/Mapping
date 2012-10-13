@@ -1,33 +1,27 @@
-using System.Collections.Generic;
+﻿using System.Data.Entity;
 using System.Linq;
 using Antix.Mapping.TestDomain.Entities;
 using Antix.Mapping.TestDomain.Models;
 using Xunit;
 
-namespace Antix.Mapping.Tests
+namespace Antix.Mapping.Tests.EF
 {
-    public class a_multi_depth_supplied_mapping_matcher
+    public class when_using_ef
     {
-        readonly IMapperContext _mapperContext;
+        readonly DataContext _dataContext;
         readonly PersonEntity _to;
         readonly Person _from;
-        readonly List<IEntity> _updatedEntities;
-        readonly List<IEntity> _deletedEntities;
 
-        public a_multi_depth_supplied_mapping_matcher()
+        public when_using_ef()
         {
-            _updatedEntities = new List<IEntity>();
-            _deletedEntities = new List<IEntity>();
-
-            _mapperContext = new MapperContext(
+            var mapperContainer =
                 new MapperContainer()
                     .Register<Person, PersonEntity>(
                         (f, t, c) =>
                             {
                                 c.Map(f.Name, () => t.Name);
-                                c.MapAll(f.Addresses, () => t.Addresses, (fa, ta) => fa.Name == ta.Name);
-                            }
-                    )
+                                c.MapAll(f.Addresses, () => t.Addresses);
+                            })
                     .Register<Name, NameEntity>(
                         (f, t, c) =>
                             {
@@ -37,17 +31,11 @@ namespace Antix.Mapping.Tests
                     )
                     .Register<Address, AddressEntity>(
                         (f, t, c) => { t.Name = f.Name; }
-                    ),
-                new MapperContext.Parameters
-                    {
-                        Deleter = o => _deletedEntities.Add((IEntity) o),
-                        Updater = o =>
-                                      {
-                                          var e = o as IEntity;
-                                          if (e != null) _updatedEntities.Add(e);
-                                      }
-                    }
-                );
+                    );
+
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<DataContext>());
+            _dataContext = new DataContext(mapperContainer);
+
 
             _from = new Person
                         {
@@ -68,8 +56,16 @@ namespace Antix.Mapping.Tests
                                               new AddressEntity {Name = "Delete"}
                                           }
                       };
+            _to = _dataContext.Create<PersonEntity>();
+            _to.Name = new NameEntity {First = "Overwite"};
+            _to.Addresses = new[]
+                                {
+                                    new AddressEntity {Name = "Keep"},
+                                    new AddressEntity {Name = "Delete"}
+                                };
+            _dataContext.SaveChanges();
 
-            _mapperContext.Map(_from, () => _to);
+            _dataContext.Map(_from, () => _to);
         }
 
         [Fact]
@@ -94,30 +90,6 @@ namespace Antix.Mapping.Tests
                     _from.Addresses.ElementAt(index).Name,
                     _to.Addresses.ElementAt(index).Name);
             }
-        }
-
-        [Fact]
-        void deletes_sub_objects()
-        {
-            Assert.Equal(1, _deletedEntities.Count());
-            Assert.IsType<AddressEntity>(_deletedEntities.ElementAt(0));
-
-            var address = (AddressEntity) _deletedEntities.ElementAt(0);
-            Assert.Equal("Delete", address.Name);
-        }
-
-        [Fact]
-        void updates_objects()
-        {
-            Assert.Equal(3, _updatedEntities.Count());
-
-            Assert.IsType<AddressEntity>(_updatedEntities.ElementAt(0));
-            var address = (AddressEntity) _updatedEntities.ElementAt(0);
-            Assert.Equal("Keep", address.Name);
-
-            Assert.IsType<AddressEntity>(_updatedEntities.ElementAt(1));
-            address = (AddressEntity) _updatedEntities.ElementAt(1);
-            Assert.Equal("New", address.Name);
         }
     }
 }

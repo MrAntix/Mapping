@@ -1,4 +1,4 @@
-﻿namespace Antix.Mapping.Tests.Entities
+﻿namespace Antix.Mapping.TestDomain.Entities
 {
     public enum RoleEntities
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Antix.Mapping.Tests.Entities;
-using Antix.Mapping.Tests.Models;
+using Antix.Mapping.TestDomain.Entities;
+using Antix.Mapping.TestDomain.Models;
 using Xunit;
 
 namespace Antix.Mapping.Tests
@@ -36,9 +36,9 @@ namespace Antix.Mapping.Tests
             var entities = default(List<PersonEntity>);
 
             _mapperContext.MapAll(new[]
-                                        {
-                                            new Person()
-                                        }, () => entities);
+                                      {
+                                          new Person()
+                                      }, () => entities);
 
             Assert.NotNull(entities);
         }

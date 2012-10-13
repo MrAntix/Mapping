@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Antix.Mapping.Tests.Entities;
-using Antix.Mapping.Tests.Models;
+using Antix.Mapping.TestDomain.Entities;
+using Antix.Mapping.TestDomain.Models;
 using Xunit;
 
 namespace Antix.Mapping.Tests
@@ -12,13 +11,11 @@ namespace Antix.Mapping.Tests
         readonly IMapperContext _mapperContext;
         readonly PersonEntity _to;
         readonly Person _from;
-        readonly List<IEntity> _updatedEntities;
-        readonly List<IEntity> _deletedEntities;
 
         public a_multi_depth_supplied_mapping_no_matcher()
         {
-            _updatedEntities = new List<IEntity>();
-            _deletedEntities = new List<IEntity>();
+            new List<IEntity>();
+            new List<IEntity>();
 
             _mapperContext = new MapperContext(
                 new MapperContainer()

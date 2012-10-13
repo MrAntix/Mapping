@@ -1,4 +1,4 @@
-namespace Antix.Mapping.Tests.Models
+namespace Antix.Mapping.TestDomain.Models
 {
     public enum Roles
     {

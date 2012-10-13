@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Antix.Mapping.Tests.Entities
+namespace Antix.Mapping.TestDomain.Entities
 {
     public class PersonEntity : IEntity
     {

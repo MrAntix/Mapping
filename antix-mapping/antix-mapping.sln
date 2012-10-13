@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antix.Mapping", "Antix.Mapp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antix.Mapping.Tests", "Antix.Mapping.Tests\Antix.Mapping.Tests.csproj", "{3F324326-FF9F-4CC7-ABA8-55A7AC61893E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antix.Mapping.Tests.EF", "Antix.Mapping.Tests.EF\Antix.Mapping.Tests.EF.csproj", "{9540316D-53EE-4CA0-A2FF-848B76F65778}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Antix.Mapping.TestDomain", "Antix.Mapping.TestDomain\Antix.Mapping.TestDomain.csproj", "{8BF2CA30-ED1D-4E8E-8BDB-2649F0BE32FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,14 @@ Global
 		{77CCEAF8-95BC-4B73-997D-0E8CE7C4777B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77CCEAF8-95BC-4B73-997D-0E8CE7C4777B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77CCEAF8-95BC-4B73-997D-0E8CE7C4777B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF2CA30-ED1D-4E8E-8BDB-2649F0BE32FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF2CA30-ED1D-4E8E-8BDB-2649F0BE32FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF2CA30-ED1D-4E8E-8BDB-2649F0BE32FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF2CA30-ED1D-4E8E-8BDB-2649F0BE32FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9540316D-53EE-4CA0-A2FF-848B76F65778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9540316D-53EE-4CA0-A2FF-848B76F65778}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9540316D-53EE-4CA0-A2FF-848B76F65778}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9540316D-53EE-4CA0-A2FF-848B76F65778}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

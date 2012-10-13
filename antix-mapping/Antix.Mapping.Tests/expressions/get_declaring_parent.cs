@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Antix.Mapping.Expressions;
-using Antix.Mapping.Tests.Models;
+using Antix.Mapping.TestDomain.Models;
 using Xunit;
 
 namespace Antix.Mapping.Tests.expressions
