@@ -6,7 +6,8 @@ When you map your objects you get the container passed into the mapper too, this
 
 ### Basic Example
 
-    // set up the container in your composite root as a single instance
+    // set up the container in your composite root 
+	// as a single instance
     var mapperContainer = new MapperContainer();
 
     var mapperContainer
@@ -62,7 +63,8 @@ In this example the IMapperContainer is injected in to the DataContext object
 
         public T Create<T>()
         {
-			// this function is called by the mapper when a new entity is needed
+			// this function is called by the mapper when 
+			// a new entity is needed
             var set = Set(typeof (T));
             return (T) set.Add(set.Create());
         }
@@ -74,7 +76,8 @@ In this example the IMapperContainer is injected in to the DataContext object
 
         public void Delete<T>(T entity)
         {
-			// this function is called by the mapper when an entity is deleted
+			// this function is called by the mapper when 
+			// an entity is deleted
             var set = Set(typeof (T));
             set.Remove(entity);
         }
