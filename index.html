@@ -36,9 +36,11 @@
 
 <h3>Basic Example</h3>
 
-<pre><code>_mapperContainer = new MapperContainer();
+<pre><code>// set up the container in your composite root 
+// as a single instance
+var mapperContainer = new MapperContainer();
 
-_mapperContainer
+var mapperContainer
     .Register&lt;Person, PersonEntity&gt;(
         (f, t, c) =&gt;
             {
@@ -48,11 +50,84 @@ _mapperContainer
     .Register&lt;Address, AddressEntity&gt;(
         (f, t, c) =&gt; { t.Name = f.Name; }
     );
+
+// create a new context as required like so
+var mapperContext = new MapperContext(mapperContainer);
+
+// inject the mapping context where you need it
+public class PersonController : Controller 
+{
+    IMapperContext _mapperContext;
+
+    public PersonController(IMapperContext mapperContext)
+    {
+        _mapperContext = mapperContext;
+    }
+
+    ActionResult Update(Person model) {
+
+        var entity = entityService.Load([SomeCriteria]);
+
+        _mapperContext.Map(model, () =&gt; entity);
+
+        entityService.Save(entity);
+    }
+}
 </code></pre>
 
-<p>In this example the registered Address =&gt; AddressEnity mapper is called for the collection of Addresses on the person</p>
+<p>In this example the registered Address =&gt; AddressEnity mapper is called for the collection of Addresses on the person
+Both Person and Address sub-collection objects are mapped</p>
 
-<p>See the tests for more examples</p>
+<h3>EntityFramework Example</h3>
+
+<p>You can use the mapper in entity framework by making your DbContext derived class also implement IMappingContext
+In this example the IMapperContainer is injected in to the DataContext object</p>
+
+<pre><code>public class DataContext : DbContext, IMapperContext
+{
+    public DataContext(IMapperContainer container)
+    {
+        Container = container;
+    }
+
+    public IMapperContainer Container { get; private set; }
+
+    public T Create&lt;T&gt;()
+    {
+        // this function is called by the mapper when 
+        // a new entity is needed
+        var set = Set(typeof (T));
+        return (T) set.Add(set.Create());
+    }
+
+    public void Update&lt;T&gt;(T entity)
+    {
+        // not required for EF
+    }
+
+    public void Delete&lt;T&gt;(T entity)
+    {
+        // this function is called by the mapper when 
+        // an entity is deleted
+        var set = Set(typeof (T));
+        set.Remove(entity);
+    }
+
+    ... and other DbContext type stuff 
+            IDbSet&lt;PersonEntity&gt; People etc
+}
+</code></pre>
+
+<p>}</p>
+
+<p>Now you can use the mapping extensions right on your data context</p>
+
+<pre><code>var dataContext = new DataContext(mappingContainer);
+
+dataContext.Map(model, () =&gt; entity);
+</code></pre>
+
+<hr><p><em>See the tests for more examples</em></p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/MrAntix">MrAntix</a></p>
