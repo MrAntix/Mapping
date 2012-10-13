@@ -4,27 +4,58 @@ This is a simple container for object mapping
 
 When you map your objects you get the container passed into the mapper too, this means you can call other mappings from inside your mapping and keep your code all nice and DRY
 
+Here are a couple of simple examples, *See the tests for more*
+
 ### Basic Example
 
-    // set up the container in your composite root 
-	// as a single instance
+Given these simple classes which need mapping, model=>entity
+	public class PersonModel
+    {
+        public string Name { get; set; }
+        public ICollection<AddressModel> Addresses { get; set; }
+    }
+
+	public class AddressModel
+    {
+        public string Name { get; set; }
+    }
+
+	public class PersonEntity
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public ICollection<AddressEntity> Addresses { get; set; }
+    }
+
+	public class AddressEntity : IEntity
+    {
+        public string Name { get; set; }
+    }
+
+Set up the container in your composite root as a single instance
+
     var mapperContainer = new MapperContainer();
 
     var mapperContainer
-        .Register<Person, PersonEntity>(
-            (f, t, c) =>
+        .Register<PersonModel, PersonEntity>(
+            (model, entity, context) =>
                 {
-                    f.Name = t.Name;
-                    c.MapAll(f.Addresses, () => t.Addresses);
+                    entity.Name = model.Name;
+                    c.MapAll(model.Addresses, () => entity.Addresses);
                 })
-        .Register<Address, AddressEntity>(
-            (f, t, c) => { t.Name = f.Name; }
+        .Register<AddressModel, AddressEntity>(
+            (model, entity, context) => 
+				{
+					entity.Name = model.Name; 
+				}
         );
 
-	// create a new context as required like so
+Create a new context as required like so, this can all be hooked by your IoC container
+
 	var mapperContext = new MapperContext(mapperContainer);
 
-	// inject the mapping context where you need it
+Inject the mapping context where you need it
+
 	public class PersonController : Controller 
 	{
 		IMapperContext _mapperContext;
@@ -34,7 +65,7 @@ When you map your objects you get the container passed into the mapper too, this
 			_mapperContext = mapperContext;
 		}
 
-		ActionResult Update(Person model) {
+		ActionResult Update(PersonModel model) {
 
 			var entity = entityService.Load([SomeCriteria]);
 
@@ -44,7 +75,7 @@ When you map your objects you get the container passed into the mapper too, this
 		}
 	}
 
-In this example the registered Address => AddressEnity mapper is called for the collection of Addresses on the person
+In this example the registered AddressModel => AddressEnity mapper is called for the collection of Addresses on the person
 Both Person and Address sub-collection objects are mapped
 
 ### EntityFramework Example
@@ -91,8 +122,3 @@ Now you can use the mapping extensions right on your data context
 	var dataContext = new DataContext(mappingContainer);
 
 	dataContext.Map(model, () => entity);
-
-
----------------------------------------
-
-*See the tests for more examples*
