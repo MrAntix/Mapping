@@ -82,9 +82,9 @@ In this example the IMapperContainer is injected in to the DataContext object
             set.Remove(entity);
         }
 
-		... an other DbContext type stuff IDbSet<PersonEntity> People etc
+		... and other DbContext type stuff 
+				IDbSet<PersonEntity> People etc
     }
-}
 
 Now you can use the mapping extensions right on your data context
 
